@@ -28,7 +28,7 @@ YES_NO_QUESTIONS = {
     'prvchd05': "Have you had a heart attack or an operation to open up your heart's arteries?",
     'stroke': "Have you ever had a stroke?",
     'act3': "Do you do less than 1 hour of physical activity a week?",
-    'insurance': "Do you have insurance coverage?",
+    'insurance': "Do you need or lack insurance coverage?",
     'p_afat3': "Do you eat a lot of animal products?"
 }
 
