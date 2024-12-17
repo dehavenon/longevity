@@ -67,7 +67,7 @@ HTML_TEMPLATE = '''
         <button type="submit">Predict</button>
     </form>
     {% if prediction is not none %}
-        <h2>Predicted ageD: {{ prediction }}</h2>
+        <h2>Predicted age at time of death: {{ prediction }}</h2>
     {% endif %}
 </body>
 </html>
