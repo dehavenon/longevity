@@ -1,4 +1,4 @@
-import os
+indey failureimport os
 from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
@@ -18,21 +18,21 @@ YES_NO_QUESTIONS = {
     'male': "Are you a man?",
     'black': "Are you Black?",
     'married': "Are you unmarried?",
+    'act3': "Do you do less than 1 hour of physical activity a week?",
+    'insurance': "Do you need or lack insurance coverage?",
+    'p_afat3': "Do you eat a lot of animal products?",
     'diabts02': "Do you have diabetes?",
     'sbp3': "Is your blood pressure elevated?",
     'cursmk01': "Do you currently smoke?",
     'cig2': "Have you smoked for over ten years?",
-    'cr_high': "Do you have high cholesterol or take medication to lower cholesterol?",
+    'cr_high': "Do you have kidney failure?",
+    'stroke': "Have you ever had a stroke?",
     'clvh01': "Do you have a history of left ventricular hypertrophy?",
     'abnormal_abi': "Do you have peripheral vascular disease?",
-    'plaque03': "Do you have plaque buildup?",
+    'plaque03': "Do you have plaque buildup in your arteries?",
     'low_plt': "Do you have a low platelet count?",
     'prevhf01': "Do you have a history of heart failure?",
-    'prvchd05': "Have you had a heart attack or an operation to open up your heart's arteries?",
-    'stroke': "Have you ever had a stroke?",
-    'act3': "Do you do less than 1 hour of physical activity a week?",
-    'insurance': "Do you need or lack insurance coverage?",
-    'p_afat3': "Do you eat a lot of animal products?"
+    'prvchd05': "Have you had a heart attack or an operation to open up your heart's arteries?"
 }
 
 app = Flask(__name__)
@@ -48,12 +48,13 @@ HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prediction Calculator</title>
+    <title>Lifespan Prediction Calculator</title>
 </head>
 <body>
     <h1>Lifespan Prediction Calculator</h1>
      <h2>If you are unsure of any repsonse, answer no</h2>
          <h3>No data is saved from this website</h3>
+                  <h3></h3>
     <form method="POST">
         <label for="v1age01">What is your age?</label>
         <input type="number" step="any" name="v1age01" required><br><br>
