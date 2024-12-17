@@ -1,4 +1,7 @@
+import os
 from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
 
 # Regression coefficients (as provided)
 COEFFICIENTS = {
@@ -90,5 +93,6 @@ def calculator():
     return render_template_string(HTML_TEMPLATE, prediction=prediction, questions=YES_NO_QUESTIONS)
 
 if __name__ == '__main__':
-    print("Starting Flask app...")  # Debug message
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    # Use PORT from environment variables or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
