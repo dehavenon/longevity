@@ -1,4 +1,4 @@
-indey failureimport os
+import os
 from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
@@ -35,8 +35,6 @@ YES_NO_QUESTIONS = {
     'prvchd05': "Have you had a heart attack or an operation to open up your heart's arteries?"
 }
 
-app = Flask(__name__)
-
 # Prediction function
 def predict_ageD(inputs):
     """Calculate the predicted ageD based on regression coefficients."""
@@ -52,9 +50,8 @@ HTML_TEMPLATE = '''
 </head>
 <body>
     <h1>Lifespan Prediction Calculator</h1>
-     <h2>If you are unsure of any repsonse, answer no</h2>
-         <h3>No data is saved from this website</h3>
-                  <h3></h3>
+    <h2>If you are unsure of any response, answer no</h2>
+    <h3>No data is saved from this website</h3>
     <form method="POST">
         <label for="v1age01">What is your age?</label>
         <input type="number" step="any" name="v1age01" required><br><br>
