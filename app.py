@@ -21,9 +21,9 @@ YES_NO_QUESTIONS = {
     'diabts02': "Do you have diabetes?",
     'sbp3': "Is your blood pressure elevated?",
     'cursmk01': "Do you currently smoke?",
-    'cig2': "Have you smoked over ten years?",
+    'cig2': "Have you smoked for over ten years?",
     'cr_high': "Do you have high cholesterol or take medication to lower cholesterol?",
-    'clvh01': "Do you have a history of cardiovascular conditions?",
+    'clvh01': "Do you have a history of left ventricular hypertrophy?",
     'abnormal_abi': "Do you have peripheral vascular disease?",
     'plaque03': "Do you have plaque buildup?",
     'low_plt': "Do you have a low platelet count?",
@@ -51,7 +51,9 @@ HTML_TEMPLATE = '''
     <title>Prediction Calculator</title>
 </head>
 <body>
-    <h1>Prediction Calculator for ageD</h1>
+    <h1>Lifespan Prediction Calculator</h1>
+     <h2>If you are unsure of any repsonse, answer no</h2>
+         <h3>No data is saved from this website</h3>
     <form method="POST">
         <label for="v1age01">What is your age?</label>
         <input type="number" step="any" name="v1age01" required><br><br>
