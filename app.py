@@ -30,16 +30,16 @@ YES_NO_QUESTIONS = {
     'p_afat3': "Do you eat a lot of animal products?",
     'diabts02': "Do you have diabetes?",
     'sbp3': "Is your blood pressure elevated?",
-    'cursmk01': "Do you currently smoke?",
+    'cursmk01': "Do you currently smoke cigarettes?",
     'cig2': "Have you smoked for over ten years?",
     'cr_high': "Do you have kidney failure?",
     'stroke': "Have you ever had a stroke?",
-    'clvh01': "Do you have a history of left ventricular hypertrophy?",
+    'prevhf01': "Do you have a history of heart failure?",
+    'prvchd05': "Have you had a heart attack or operation to open up your heart's arteries?",
     'abnormal_abi': "Do you have peripheral vascular disease?",
     'plaque03': "Do you have plaque buildup in your arteries?",
-    'low_plt': "Do you have a low platelet count?",
-    'prevhf01': "Do you have a history of heart failure?",
-    'prvchd05': "Have you had a heart attack or an operation to open up your heart's arteries?"
+    'clvh01': "Do you have a history of left ventricular hypertrophy?",
+    'low_plt': "Do you have a low platelet count?"
 }
 
 # Prediction function with confidence intervals
@@ -48,14 +48,17 @@ def predict_with_ci(inputs, z_value=1.96):
     # Calculate the prediction
     prediction = INTERCEPT + sum(COEFFICIENTS[var] * inputs.get(var, 0) for var in COEFFICIENTS)
     
-    # Calculate the variance of the prediction
-    variance = sum((inputs.get(var, 0) ** 2) * (STANDARD_ERRORS[var] ** 2) for var in COEFFICIENTS)
+    # Calculate the variance of the prediction (sum of squared contributions)
+    variance = sum(
+        (COEFFICIENTS[var] ** 2) * (STANDARD_ERRORS[var] ** 2) * (inputs.get(var, 0) ** 2)
+        for var in COEFFICIENTS
+    )
     std_error = variance ** 0.5  # Standard error
-    
+
     # Calculate confidence intervals
     lower_bound = prediction - z_value * std_error
     upper_bound = prediction + z_value * std_error
-    
+
     return round(prediction, 1), round(lower_bound, 1), round(upper_bound, 1)
 
 # HTML Template
@@ -64,6 +67,75 @@ HTML_TEMPLATE = '''
 <html>
 <head>
     <title>Lifespan Prediction Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        h1 {
+            color: #4CAF50;
+            font-size: 2.5em;
+        }
+        h2 {
+            font-size: 1.5em;
+            color: #333;
+        }
+        h3 {
+            font-size: 1em;
+            color: #666;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-size: 1.2em;
+            color: #444;
+        }
+        input, select, button {
+            font-size: 1.1em;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            text-align: center;
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #2e7d32;
+        }
+        .result h2 {
+            margin: 0;
+            font-weight: normal;
+        }
+    </style>
 </head>
 <body>
     <h1>Lifespan Prediction Calculator</h1>
@@ -84,8 +156,10 @@ HTML_TEMPLATE = '''
         <button type="submit">Predict</button>
     </form>
     {% if prediction is not none %}
-        <h2>Predicted age at time of death: {{ prediction }}</h2>
-        <h3>95% Confidence Interval: [{{ lower_bound }} - {{ upper_bound }}]</h3>
+        <div class="result">
+            <h2>Predicted age at death: {{ prediction }} years old</h2>
+            <h3>95% Confidence Interval: [{{ lower_bound }} - {{ upper_bound }} years]</h3>
+        </div>
     {% endif %}
 </body>
 </html>
@@ -105,11 +179,10 @@ def calculator():
                     value = 1 - value  # Flip 1 to 0 and 0 to 1
                 inputs[var] = value
             
-            # Call predict_with_ci with inputs
+            # Predict ageD with confidence intervals
             prediction, lower_bound, upper_bound = predict_with_ci(inputs)
         except ValueError as e:
             print("Error:", e)  # Print the error to debug
-            prediction = "Error: Please enter valid inputs."
     return render_template_string(
         HTML_TEMPLATE,
         prediction=prediction,
@@ -120,5 +193,5 @@ def calculator():
 
 if __name__ == '__main__':
     # Use PORT from environment variables or default to 5000
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 6200))
     app.run(host='0.0.0.0', port=port, debug=False)
