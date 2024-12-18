@@ -92,24 +92,31 @@ HTML_TEMPLATE = '''
 '''
 
 @app.route('/', methods=['GET', 'POST'])
-def predict_with_ci(inputs, z_value=1.96):
-    """Calculate the predicted ageD and its confidence interval."""
-    # Calculate the prediction
-    prediction = INTERCEPT + sum(COEFFICIENTS[var] * inputs.get(var, 0) for var in COEFFICIENTS)
-    
-    # Calculate the variance of the prediction (sum of squared contributions)
-    variance = sum(
-        (COEFFICIENTS[var] ** 2) * (STANDARD_ERRORS[var] ** 2) * (inputs.get(var, 0) ** 2)
-        for var in COEFFICIENTS
+def calculator():
+    prediction, lower_bound, upper_bound = None, None, None
+    if request.method == 'POST':
+        try:
+            # Parse input values (age as float, yes/no as integers, default to 0 if missing)
+            inputs = {'v1age01': float(request.form.get('v1age01', 0))}
+            for var in YES_NO_QUESTIONS.keys():
+                value = int(request.form.get(var, 0))
+                # Reverse direction for married and insurance variables
+                if var in ['married', 'insurance']:
+                    value = 1 - value  # Flip 1 to 0 and 0 to 1
+                inputs[var] = value
+            
+            # Call predict_with_ci with inputs
+            prediction, lower_bound, upper_bound = predict_with_ci(inputs)
+        except ValueError as e:
+            print("Error:", e)  # Print the error to debug
+            prediction = "Error: Please enter valid inputs."
+    return render_template_string(
+        HTML_TEMPLATE,
+        prediction=prediction,
+        lower_bound=lower_bound,
+        upper_bound=upper_bound,
+        questions=YES_NO_QUESTIONS
     )
-    std_error = variance ** 0.5  # Standard error
-
-    # Calculate confidence intervals
-    lower_bound = prediction - z_value * std_error
-    upper_bound = prediction + z_value * std_error
-
-    return round(prediction, 1), round(lower_bound, 1), round(upper_bound, 1)
-
 
 if __name__ == '__main__':
     # Use PORT from environment variables or default to 5000
