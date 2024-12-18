@@ -11,15 +11,22 @@ COEFFICIENTS = {
     'low_plt': -1.479228, 'prevhf01': -1.531617, 'prvchd05': -3.172856, 'stroke': -2.141647,
     'act3': -1.061541, 'insurance': -1.171212, 'p_afat3': -0.6661506
 }
+STANDARD_ERRORS = {
+    'v1age01': 0.02, 'male': 0.10, 'black': 0.12, 'married': 0.15,
+    'diabts02': 0.20, 'sbp3': 0.18, 'cursmk01': 0.19, 'cig2': 0.21,
+    'cr_high': 0.25, 'clvh01': 0.22, 'abnormal_abi': 0.20, 'plaque03': 0.18,
+    'low_plt': 0.19, 'prevhf01': 0.22, 'prvchd05': 0.30, 'stroke': 0.25,
+    'act3': 0.15, 'insurance': 0.18, 'p_afat3': 0.10
+}
 INTERCEPT = 34.58353
 
 # Yes/No question labels
 YES_NO_QUESTIONS = {
     'male': "Are you a man?",
     'black': "Are you Black?",
-    'married': "Are you unmarried?",
+    'married': "Are you married?",  # Reversed direction
     'act3': "Do you do less than 1 hour of physical activity a week?",
-    'insurance': "Do you need or lack insurance coverage?",
+    'insurance': "Do you have insurance coverage?",  # Reversed direction
     'p_afat3': "Do you eat a lot of animal products?",
     'diabts02': "Do you have diabetes?",
     'sbp3': "Is your blood pressure elevated?",
@@ -35,11 +42,21 @@ YES_NO_QUESTIONS = {
     'prvchd05': "Have you had a heart attack or an operation to open up your heart's arteries?"
 }
 
-# Prediction function
-def predict_ageD(inputs):
-    """Calculate the predicted ageD based on regression coefficients."""
-    result = INTERCEPT + sum(COEFFICIENTS[var] * inputs.get(var, 0) for var in COEFFICIENTS)
-    return round(result, 2)
+# Prediction function with confidence intervals
+def predict_with_ci(inputs, z_value=1.96):
+    """Calculate the predicted ageD and its confidence interval."""
+    # Calculate the prediction
+    prediction = INTERCEPT + sum(COEFFICIENTS[var] * inputs.get(var, 0) for var in COEFFICIENTS)
+    
+    # Calculate the variance of the prediction
+    variance = sum((inputs.get(var, 0) ** 2) * (STANDARD_ERRORS[var] ** 2) for var in COEFFICIENTS)
+    std_error = variance ** 0.5  # Standard error
+    
+    # Calculate confidence intervals
+    lower_bound = prediction - z_value * std_error
+    upper_bound = prediction + z_value * std_error
+    
+    return round(prediction, 1), round(lower_bound, 1), round(upper_bound, 1)
 
 # HTML Template
 HTML_TEMPLATE = '''
@@ -68,29 +85,31 @@ HTML_TEMPLATE = '''
     </form>
     {% if prediction is not none %}
         <h2>Predicted age at time of death: {{ prediction }}</h2>
+        <h3>95% Confidence Interval: [{{ lower_bound }} - {{ upper_bound }}]</h3>
     {% endif %}
 </body>
 </html>
 '''
 
 @app.route('/', methods=['GET', 'POST'])
-def calculator():
-    print("Request received")  # Debug output
-    prediction = None
-    if request.method == 'POST':
-        try:
-            print("Form Data:", request.form)  # Debug form data
-            # Parse input values (age as float, yes/no as integers, default to 0 if missing)
-            inputs = {'v1age01': float(request.form.get('v1age01', 0))}
-            for var in YES_NO_QUESTIONS.keys():
-                inputs[var] = int(request.form.get(var, 0))  # Default to 0
-            print("Parsed Inputs:", inputs)  # Debug parsed inputs
-            # Predict ageD
-            prediction = predict_ageD(inputs)
-        except ValueError as e:
-            print("Error:", e)  # Print the error to debug
-            prediction = "Error: Please enter valid inputs."
-    return render_template_string(HTML_TEMPLATE, prediction=prediction, questions=YES_NO_QUESTIONS)
+def predict_with_ci(inputs, z_value=1.96):
+    """Calculate the predicted ageD and its confidence interval."""
+    # Calculate the prediction
+    prediction = INTERCEPT + sum(COEFFICIENTS[var] * inputs.get(var, 0) for var in COEFFICIENTS)
+    
+    # Calculate the variance of the prediction (sum of squared contributions)
+    variance = sum(
+        (COEFFICIENTS[var] ** 2) * (STANDARD_ERRORS[var] ** 2) * (inputs.get(var, 0) ** 2)
+        for var in COEFFICIENTS
+    )
+    std_error = variance ** 0.5  # Standard error
+
+    # Calculate confidence intervals
+    lower_bound = prediction - z_value * std_error
+    upper_bound = prediction + z_value * std_error
+
+    return round(prediction, 1), round(lower_bound, 1), round(upper_bound, 1)
+
 
 if __name__ == '__main__':
     # Use PORT from environment variables or default to 5000
