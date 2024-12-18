@@ -127,7 +127,7 @@ HTML_TEMPLATE = '''
             background: #e8f5e9;
             padding: 15px;
             border-radius: 10px;
-            margin-top: 20px;
+            margin: 20px auto;
             font-size: 1.5em;
             color: #2e7d32;
         }
@@ -139,7 +139,15 @@ HTML_TEMPLATE = '''
 </head>
 <body>
     <h1>Lifespan Prediction Calculator</h1>
-    <h2>If you are unsure of any response, answer no</h2>
+    
+    {% if prediction is not none %}
+    <div class="result">
+        <h2>Predicted age at death: {{ prediction }} years old</h2>
+        <h3>95% Confidence Interval: [{{ lower_bound }} - {{ upper_bound }} years]</h3>
+    </div>
+    {% endif %}
+    
+    <h2>If you are unsure of any response, leave the answer no</h2>
     <h3>No data is saved from this website</h3>
     <form method="POST">
         <label for="v1age01">What is your age?</label>
@@ -155,12 +163,6 @@ HTML_TEMPLATE = '''
         
         <button type="submit">Predict</button>
     </form>
-    {% if prediction is not none %}
-        <div class="result">
-            <h2>Predicted age at death: {{ prediction }} years old</h2>
-            <h3>95% Confidence Interval: [{{ lower_bound }} - {{ upper_bound }} years]</h3>
-        </div>
-    {% endif %}
 </body>
 </html>
 '''
